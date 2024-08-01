@@ -8,7 +8,7 @@ def initialize_board():
     # Initialize the board with mines and visibility matrix
     mines = [[0 for _ in range(N)] for _ in range(N)]
     visible = [[0 for _ in range(N)] for _ in range(N)]
-    
+
     # Place mines randomly on the board
     placed_mines = 0
     while placed_mines < B:
@@ -17,7 +17,7 @@ def initialize_board():
         if mines[x][y] == 0:
             mines[x][y] = 1
             placed_mines += 1
-            
+
     return mines, visible
 
 def print_board(visible, mines):
@@ -26,12 +26,14 @@ def print_board(visible, mines):
     for i in range(1, N + 1):
         print(chr(64 + i), end=" ")
     print()
-    
+
     for y in range(N):
         print(y + 1, end=" ")
         for x in range(N):
             if visible[x][y] == 0:
                 print(".", end=" ")
+            elif visible[x][y] == 2:
+                print("F", end=" ")  # Flag for marked bombs
             else:
                 # Count surrounding mines
                 count = 0
@@ -49,47 +51,78 @@ def reveal_mines(mines):
             if mines[x][y] == 1:
                 print(f"MINE AT {chr(64 + x + 1)}{y + 1}")
 
+def reveal_surroundings(visible, mines, x, y):
+    # Reveal all surrounding cells of a given coordinate
+    for dx in range(-1, 2):
+        for dy in range(-1, 2):
+            nx, ny = x + dx, y + dy
+            if 0 <= nx < N and 0 <= ny < N:
+                if visible[nx][ny] == 0:  # Only reveal if not already visible
+                    visible[nx][ny] = 1
+
 def play_game():
     print("*** MINESWEEPER PARA COMMODORE 64 ***")
     print("INSTRUÇÕES:")
     print("1. DIGITE UMA COORDENADA PARA REVELAR UMA CÉLULA (POR EXEMPLO, A5)")
     print("2. DIGITE 'Q' PARA SAIR DO JOGO")
+    print("3. DIGITE 'ZA5' PARA REVELAR TODAS AS CÉLULAS AO REDOR DE A5")
+    print("4. DIGITE 'XA5' PARA MARCAR A5 COMO UMA BOMBA")
     print()
 
     mines, visible = initialize_board()
     print_board(visible, mines)
-    
+
     while True:
         coord = input("DIGITE A COORDENADA (EXEMPLO: A1): ").upper()
         if coord == "Q":
             break
-        
+
         if len(coord) < 2:
             print("COORDENADA INVÁLIDA")
             continue
-        
+
+        # Handle special commands
+        if coord[0] == 'Z':
+            prefix = 'Z'
+        elif coord[0] == 'X':
+            prefix = 'X'
+        else:
+            prefix = ''
+
         try:
-            x = ord(coord[0]) - 65
-            y = int(coord[1:]) - 1
+            x = ord(coord[len(prefix)]) - 65
+            y = int(coord[len(prefix)+1:]) - 1
         except ValueError:
             print("COORDENADA INVÁLIDA")
             continue
-        
+
         if x < 0 or x >= N or y < 0 or y >= N:
             print("COORDENADA INVÁLIDA")
             continue
-        
+
+        if prefix == 'Z':
+            # Reveal surroundings
+            reveal_surroundings(visible, mines, x, y)
+            print_board(visible, mines)
+            continue
+
+        if prefix == 'X':
+            # Mark a bomb
+            visible[x][y] = 2
+            print_board(visible, mines)
+            continue
+
         if visible[x][y] == 1:
             print("JÁ REVELADO")
             continue
-        
+
         visible[x][y] = 1
-        
+
         if mines[x][y] == 1:
             print("VOCÊ ACERTOU UMA MINA! GAME OVER.")
             reveal_mines(mines)
             break
-        
+
         print_board(visible, mines)
 
 play_game()
