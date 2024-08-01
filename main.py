@@ -56,25 +56,19 @@ def reveal_mines(mines):
             if mines[x][y] == 1:
                 print(f"MINE AT {chr(64 + x + 1)}{y + 1}")
 
-def reveal_surroundings(visible, mines, x, y):
-    # Reveal all surrounding cells of a given coordinate
+def reveal_adjacent(visible, mines, x, y):
+    # Reveal all immediate surrounding cells of a given coordinate
     for dx in range(-1, 2):
         for dy in range(-1, 2):
-            if dx == 0 and dy == 0:
-                continue  # Skip the center cell
             nx, ny = x + dx, y + dy
-            if 0 <= nx < N and 0 <= ny < N:
-                if mines[nx][ny] == 1:
-                    # If a mine is found, reveal all mines and end the game
-                    print(f"VOCÊ ACERTOU UMA MINA EM {chr(64 + nx + 1)}{ny + 1}! GAME OVER.")
-                    reveal_mines(mines)
-                    return True  # Signal that a mine was found
+            if (dx != 0 or dy != 0) and 0 <= nx < N and 0 <= ny < N:
                 if visible[nx][ny] == 0:  # Only reveal if not already visible
                     visible[nx][ny] = 1
-                    # Check for surrounding mines
-                    if count_surrounding_mines(mines, nx, ny) == 0:
-                        # If no mines around, recursively reveal further
-                        reveal_surroundings(visible, mines, nx, ny)
+                    if mines[nx][ny] == 1:
+                        # If a mine is found, reveal all mines and end the game
+                        print(f"VOCÊ ACERTOU UMA MINA EM {chr(64 + nx + 1)}{ny + 1}! GAME OVER.")
+                        reveal_mines(mines)
+                        return True  # Signal that a mine was found
     return False  # No mine was found
 
 def toggle_flag(visible, x, y):
@@ -125,8 +119,8 @@ def play_game():
             continue
 
         if prefix == 'Z':
-            # Reveal surroundings without changing the center cell
-            if reveal_surroundings(visible, mines, x, y):
+            # Reveal adjacent cells without changing the center cell
+            if reveal_adjacent(visible, mines, x, y):
                 break  # End game if a mine was found
             print_board(visible, mines)
             continue
