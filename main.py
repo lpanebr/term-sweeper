@@ -4,6 +4,21 @@ import random
 N = 8  # Size of the board (8x8)
 B = 10  # Number of mines
 
+# ANSI color codes for colored output in terminal
+COLORS = {
+    "RESET": "\033[0m",
+    "RED": "\033[31m",
+    "GREEN": "\033[32m",
+    "YELLOW": "\033[33m",
+    "BLUE": "\033[34m",
+    "MAGENTA": "\033[35m",
+    "CYAN": "\033[36m",
+    "WHITE": "\033[37m",
+    "BOLD": "\033[1m",
+    "DIM": "\033[2m",
+    "UNDERLINE": "\033[4m",
+}
+
 def initialize_board():
     # Initialize the board with mines and visibility matrix
     mines = [[0 for _ in range(N)] for _ in range(N)]
@@ -21,23 +36,34 @@ def initialize_board():
     return mines, visible
 
 def print_board(visible, mines):
-    # Print the current state of the board
+    # Print the current state of the board with colors
     print("  ", end="")
     for i in range(1, N + 1):
-        print(chr(64 + i), end=" ")
+        print(COLORS["BOLD"] + COLORS["CYAN"] + chr(64 + i) + COLORS["RESET"], end=" ")
     print()
 
     for y in range(N):
-        print(y + 1, end=" ")
+        print(COLORS["BOLD"] + COLORS["CYAN"] + str(y + 1) + COLORS["RESET"], end=" ")
         for x in range(N):
             if visible[x][y] == 0:
                 print(".", end=" ")
             elif visible[x][y] == 2:
-                print("X", end=" ")  # Flag for marked bombs
+                print(COLORS["YELLOW"] + "X" + COLORS["RESET"], end=" ")  # Flag for marked bombs
             else:
-                # Count surrounding mines
                 count = count_surrounding_mines(mines, x, y)
-                print(count, end=" ")
+                if mines[x][y] == 1:
+                    print(COLORS["RED"] + "X" + COLORS["RESET"], end=" ")
+                else:
+                    color = COLORS["WHITE"]
+                    if count == 1:
+                        color = COLORS["BLUE"]
+                    elif count == 2:
+                        color = COLORS["GREEN"]
+                    elif count == 3:
+                        color = COLORS["YELLOW"]
+                    elif count >= 4:
+                        color = COLORS["RED"]
+                    print(color + str(count) + COLORS["RESET"], end=" ")
         print()
 
 def count_surrounding_mines(mines, x, y):
@@ -78,9 +104,17 @@ def toggle_flag(visible, x, y):
     elif visible[x][y] == 2:
         visible[x][y] = 0  # Unmark as suspected bomb
 
+def check_victory(visible, mines):
+    # Check if all non-mine cells are revealed
+    for x in range(N):
+        for y in range(N):
+            if visible[x][y] == 0 and mines[x][y] == 0:
+                return False
+    return True
+
 def play_game():
-    print("*** MINESWEEPER PARA COMMODORE 64 ***")
-    print("INSTRUÇÕES:")
+    print(COLORS["BOLD"] + "*** MINESWEEPER PARA COMMODORE 64 ***" + COLORS["RESET"])
+    print(COLORS["CYAN"] + "INSTRUÇÕES:" + COLORS["RESET"])
     print("1. DIGITE UMA COORDENADA PARA REVELAR UMA CÉLULA (POR EXEMPLO, A5)")
     print("2. DIGITE 'Q' PARA SAIR DO JOGO")
     print("3. DIGITE 'ZA5' PARA REVELAR TODAS AS CÉLULAS AO REDOR DE A5")
@@ -123,6 +157,9 @@ def play_game():
             if reveal_adjacent(visible, mines, x, y):
                 break  # End game if a mine was found
             print_board(visible, mines)
+            if check_victory(visible, mines):
+                print(COLORS["GREEN"] + COLORS["BOLD"] + "PARABÉNS! VOCÊ VENCEU O JOGO!" + COLORS["RESET"])
+                break
             continue
 
         if prefix == 'X':
@@ -143,5 +180,9 @@ def play_game():
             break
 
         print_board(visible, mines)
+
+        if check_victory(visible, mines):
+            print(COLORS["GREEN"] + COLORS["BOLD"] + "PARABÉNS! VOCÊ VENCEU O JOGO!" + COLORS["RESET"])
+            break
 
 play_game()
