@@ -33,7 +33,7 @@ def print_board(visible, mines):
             if visible[x][y] == 0:
                 print(".", end=" ")
             elif visible[x][y] == 2:
-                print("F", end=" ")  # Flag for marked bombs
+                print("X", end=" ")  # Flag for marked bombs
             else:
                 # Count surrounding mines
                 count = count_surrounding_mines(mines, x, y)
@@ -60,6 +60,8 @@ def reveal_surroundings(visible, mines, x, y):
     # Reveal all surrounding cells of a given coordinate
     for dx in range(-1, 2):
         for dy in range(-1, 2):
+            if dx == 0 and dy == 0:
+                continue  # Skip the center cell
             nx, ny = x + dx, y + dy
             if 0 <= nx < N and 0 <= ny < N:
                 if mines[nx][ny] == 1:
@@ -75,13 +77,20 @@ def reveal_surroundings(visible, mines, x, y):
                         reveal_surroundings(visible, mines, nx, ny)
     return False  # No mine was found
 
+def toggle_flag(visible, x, y):
+    # Toggle the flag for marking or unmarking a cell as a suspected bomb
+    if visible[x][y] == 0:
+        visible[x][y] = 2  # Mark as suspected bomb
+    elif visible[x][y] == 2:
+        visible[x][y] = 0  # Unmark as suspected bomb
+
 def play_game():
     print("*** MINESWEEPER PARA COMMODORE 64 ***")
     print("INSTRUÇÕES:")
     print("1. DIGITE UMA COORDENADA PARA REVELAR UMA CÉLULA (POR EXEMPLO, A5)")
     print("2. DIGITE 'Q' PARA SAIR DO JOGO")
     print("3. DIGITE 'ZA5' PARA REVELAR TODAS AS CÉLULAS AO REDOR DE A5")
-    print("4. DIGITE 'XA5' PARA MARCAR A5 COMO UMA BOMBA")
+    print("4. DIGITE 'XA5' PARA MARCAR/DESMARCAR A5 COMO UMA BOMBA")
     print()
 
     mines, visible = initialize_board()
@@ -116,15 +125,15 @@ def play_game():
             continue
 
         if prefix == 'Z':
-            # Reveal surroundings
+            # Reveal surroundings without changing the center cell
             if reveal_surroundings(visible, mines, x, y):
                 break  # End game if a mine was found
             print_board(visible, mines)
             continue
 
         if prefix == 'X':
-            # Mark a bomb
-            visible[x][y] = 2
+            # Toggle flag for the cell
+            toggle_flag(visible, x, y)
             print_board(visible, mines)
             continue
 
