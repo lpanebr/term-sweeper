@@ -36,13 +36,18 @@ def print_board(visible, mines):
                 print("F", end=" ")  # Flag for marked bombs
             else:
                 # Count surrounding mines
-                count = 0
-                for dx in range(-1, 2):
-                    for dy in range(-1, 2):
-                        if 0 <= x + dx < N and 0 <= y + dy < N:
-                            count += mines[x + dx][y + dy]
+                count = count_surrounding_mines(mines, x, y)
                 print(count, end=" ")
         print()
+
+def count_surrounding_mines(mines, x, y):
+    # Count the number of mines surrounding a given cell
+    count = 0
+    for dx in range(-1, 2):
+        for dy in range(-1, 2):
+            if 0 <= x + dx < N and 0 <= y + dy < N:
+                count += mines[x + dx][y + dy]
+    return count
 
 def reveal_mines(mines):
     # Reveal all mines on the board
@@ -57,8 +62,18 @@ def reveal_surroundings(visible, mines, x, y):
         for dy in range(-1, 2):
             nx, ny = x + dx, y + dy
             if 0 <= nx < N and 0 <= ny < N:
+                if mines[nx][ny] == 1:
+                    # If a mine is found, reveal all mines and end the game
+                    print(f"VOCÊ ACERTOU UMA MINA EM {chr(64 + nx + 1)}{ny + 1}! GAME OVER.")
+                    reveal_mines(mines)
+                    return True  # Signal that a mine was found
                 if visible[nx][ny] == 0:  # Only reveal if not already visible
                     visible[nx][ny] = 1
+                    # Check for surrounding mines
+                    if count_surrounding_mines(mines, nx, ny) == 0:
+                        # If no mines around, recursively reveal further
+                        reveal_surroundings(visible, mines, nx, ny)
+    return False  # No mine was found
 
 def play_game():
     print("*** MINESWEEPER PARA COMMODORE 64 ***")
@@ -102,7 +117,8 @@ def play_game():
 
         if prefix == 'Z':
             # Reveal surroundings
-            reveal_surroundings(visible, mines, x, y)
+            if reveal_surroundings(visible, mines, x, y):
+                break  # End game if a mine was found
             print_board(visible, mines)
             continue
 
@@ -119,7 +135,7 @@ def play_game():
         visible[x][y] = 1
 
         if mines[x][y] == 1:
-            print("VOCÊ ACERTOU UMA MINA! GAME OVER.")
+            print(f"VOCÊ ACERTOU UMA MINA EM {chr(64 + x + 1)}{y + 1}! GAME OVER.")
             reveal_mines(mines)
             break
 
