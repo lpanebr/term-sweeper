@@ -1,6 +1,7 @@
 import random
 import time
 import os
+import re
 
 # Constants for the game
 N = 8  # Size of the board (8x8)
@@ -21,6 +22,15 @@ COLORS = {
     "UNDERLINE": "\033[4m",
 }
 
+instructions = (
+    f"{COLORS['BOLD']}{COLORS['BLUE']}TermSweeper{COLORS['RESET']}\n\n"
+    f"{COLORS['CYAN']}INSTRUCTIONS{COLORS['RESET']}\n"
+    f"{COLORS['GREEN']}1. Open a cell:{COLORS['RESET']} Enter a coordinate (e.g., a5)\n"
+    f"{COLORS['GREEN']}2. Exit the game:{COLORS['RESET']} q\n"
+    f"{COLORS['GREEN']}3. Open surrounding cells:{COLORS['RESET']} Use z as a prefix (e.g., za5)\n"
+    f"{COLORS['GREEN']}4. Flag/unflag a mine:{COLORS['RESET']} Use f as a prefix (e.g., fa5)\n"
+    f"{COLORS['GREEN']}5. Show/Hide help instructions:{COLORS['RESET']} h"
+)
 
 def initialize_board():
     # Initialize the board with mines and visibility matrix
@@ -43,7 +53,6 @@ def clear_screen():
     # Clear the console screen
     os.system('cls' if os.name == 'nt' else 'clear')
 
-
 def print_board(visible, mines, mines_left, elapsed_time, game_over=False):
     # Clear the screen before printing the new board
     clear_screen()
@@ -63,10 +72,11 @@ def print_board(visible, mines, mines_left, elapsed_time, game_over=False):
                 print(COLORS["RED"] + "◉" + COLORS["RESET"],
                       end=" ")  # Show mines as ◉ on game over
             elif visible[x][y] == 0:
-                print("▢", end=" ")  # Use ▢ for cells not revealed
+                print("▩", end=" ")  # Use ▩ for cells not revealed
+                # print("▢", end=" ")  # Use ▢ for cells not revealed
             elif visible[x][y] == 2:
-                print(COLORS["RED"] + "▸" + COLORS["RESET"],
-                      end=" ")  # Use ▸ for flagged cells
+                print(COLORS["RED"] + "▩" + COLORS["RESET"],
+                      end=" ")  # Use ▩ for flagged cells
             else:
                 count = count_surrounding_mines(mines, x, y)
                 if count == 0:
@@ -96,6 +106,8 @@ def print_board(visible, mines, mines_left, elapsed_time, game_over=False):
     # Display remaining mines and elapsed time
     print(f"\nMINAS: {mines_left}")
     print(f"TEMPO: {elapsed_time}")
+    print()
+    print_boxed_text(instructions, COLORS["DIM"], COLORS["RESET"])
 
 
 def count_surrounding_mines(mines, x, y):
@@ -168,15 +180,32 @@ def check_victory(visible, mines):
                 return False
     return True
 
+def print_boxed_text(text, border_color, text_color):
+    reset_color = COLORS["RESET"]
+    lines = text.split("\n")
+    
+    # Remove ANSI escape codes to calculate the correct length
+    ansi_escape = re.compile(r'\x1b\[[0-9;]*m')
+    stripped_lines = [ansi_escape.sub('', line) for line in lines]
+    
+    max_length = max(len(line) for line in stripped_lines)  # Find the maximum length of stripped lines
+    
+    # Print the top border
+    print(border_color + "  ┌─" + "─" * max_length + "─┐" + reset_color)
+    
+    # Print each line within the box
+    for line in lines:
+        # Calculate padding
+        stripped_line = ansi_escape.sub('', line)
+        padding = max_length - len(stripped_line)
+        
+        # Print the text centered with padding spaces
+        print(border_color + "  │ " + text_color + line + " " * padding + reset_color + border_color + " │")
+    
+    # Print the bottom border
+    print(border_color + "  └─" + "─" * max_length + "─┘" + reset_color)
 
 def play_game():
-    print(COLORS["BOLD"] + "*** MINESWEEPER PARA COMMODORE 64 ***" +
-          COLORS["RESET"])
-    print(COLORS["CYAN"] + "INSTRUÇÕES:" + COLORS["RESET"])
-    print("1. DIGITE UMA COORDENADA PARA REVELAR UMA CÉLULA (POR EXEMPLO, A5)")
-    print("2. DIGITE 'Q' PARA SAIR DO JOGO")
-    print("3. DIGITE 'ZA5' PARA REVELAR TODAS AS CÉLULAS AO REDOR DE A5")
-    print("4. DIGITE 'XA5' PARA MARCAR/DESMARCAR A5 COMO UMA BOMBA")
     print()
 
     while True:
@@ -216,8 +245,8 @@ def play_game():
             # Handle special commands
             if coord[0] == 'Z':
                 prefix = 'Z'
-            elif coord[0] == 'X':
-                prefix = 'X'
+            elif coord[0] == 'F':
+                prefix = 'F'
             else:
                 prefix = ''
 
@@ -243,7 +272,7 @@ def play_game():
                     break
                 continue
 
-            if prefix == 'X':
+            if prefix == 'F':
                 # Toggle flag for the cell
                 if visible[x][y] in (0, 2):  # Only toggle if not revealed
                     toggle_flag(visible, x, y)
