@@ -33,6 +33,8 @@ instructions = (
     f"{COLORS['GREEN']}5. Show/Hide help instructions:{COLORS['RESET']} h"
 )
 
+game_over_msg = ""
+
 
 def initialize_board():
     # Initialize the board with mines and visibility matrix
@@ -57,7 +59,7 @@ def clear_screen():
 
 
 def print_board(
-    visible, mines, mines_left, elapsed_time, show_instructions, game_over=False
+    visible, mines, mines_left, elapsed_time, show_instructions, game_over=""
 ):
     # Clear the screen before printing the new board
     clear_screen()
@@ -75,7 +77,7 @@ def print_board(
     for y in range(N):
         print(COLORS["DIM"] + f"{y + 1} │" + COLORS["RESET"], end=" ")
         for x in range(N):
-            if game_over and mines[x][y] == 1:
+            if len(game_over) > 0 and mines[x][y] == 1:
                 print(
                     COLORS["RED"] + "◉" + COLORS["RESET"], end=" "
                 )  # Show mines as ◉ on game over
@@ -140,17 +142,14 @@ def reveal_adjacent(visible, mines, x, y):
                 if visible[nx][ny] == 0:  # Only reveal if not already visible
                     visible[nx][ny] = 1
                     if mines[nx][ny] == 1:
-                        # If a mine is found, reveal all mines and end the game
-                        print(
-                            f"VOCÊ ACERTOU UMA MINA EM {chr(64 + nx + 1)}{ny + 1}! GAME OVER."
-                        )
+                        game_over_msg = f"VOCÊ ACERTOU UMA MINA EM {chr(64 + nx + 1)}{ny + 1}! GAME OVER."
                         print_board(
                             visible,
                             mines,
                             0,
                             0,
                             show_instructions=False,
-                            game_over=True,
+                            game_over=game_over_msg,
                         )  # Show mines
                         return True  # Signal that a mine was found
     return False  # No mine was found
@@ -336,13 +335,26 @@ def play_game():
                 auto_reveal(visible, mines, x, y)
 
             if mines[x][y] == 1:
-                print(f"VOCÊ ACERTOU UMA MINA EM {chr(64 + x + 1)}{y + 1}! GAME OVER.")
+                game_over_msg = (
+                    f"VOCÊ ACERTOU UMA MINA EM {chr(64 + x + 1)}{y + 1}! GAME OVER."
+                )
                 print_board(
-                    visible, mines, 0, 0, show_instructions=False, game_over=True
+                    visible,
+                    mines,
+                    0,
+                    0,
+                    show_instructions=False,
+                    game_over=game_over_msg,
                 )  # Show mines
                 break
 
-            print_board(visible, mines, mines_left, elapsed_time, show_instructions)
+            print_board(
+                visible,
+                mines,
+                mines_left,
+                elapsed_time,
+                show_instructions,
+            )
 
             if check_victory(visible, mines):
                 print(
@@ -352,6 +364,9 @@ def play_game():
                     + COLORS["RESET"]
                 )
                 break
+
+        if len(game_over_msg) > 0:
+            print_boxed_text(game_over_msg, COLORS["RED"], COLORS["YELLOW"])
 
         # Ask if the player wants to play again
         choice = input("VOCÊ DESEJA JOGAR NOVAMENTE? (S/N): ").upper()
