@@ -59,16 +59,21 @@ def print_board(visible, mines):
                 if mines[x][y] == 1:
                     print(COLORS["RED"] + "X" + COLORS["RESET"], end=" ")
                 else:
-                    color = COLORS["WHITE"]
-                    if count == 1:
-                        color = COLORS["BLUE"]
-                    elif count == 2:
-                        color = COLORS["GREEN"]
-                    elif count == 3:
-                        color = COLORS["YELLOW"]
-                    elif count >= 4:
-                        color = COLORS["RED"]
-                    print(color + str(count) + COLORS["RESET"], end=" ")
+                    if count == 0:
+                        print(
+                            " ", end=" "
+                        )  # Show empty space for cells with no adjacent mines
+                    else:
+                        color = COLORS["WHITE"]
+                        if count == 1:
+                            color = COLORS["BLUE"]
+                        elif count == 2:
+                            color = COLORS["GREEN"]
+                        elif count == 3:
+                            color = COLORS["YELLOW"]
+                        elif count >= 4:
+                            color = COLORS["RED"]
+                        print(color + str(count) + COLORS["RESET"], end=" ")
         print()
 
 
@@ -148,7 +153,7 @@ def play_game():
             if coord == "Q":
                 choice = input("VOCÊ DESEJA JOGAR NOVAMENTE? (S/N): ").upper()
                 if choice == "N":
-                    return
+                    return  # Termina o jogo
                 elif choice == "S":
                     continue
                 else:
@@ -220,6 +225,10 @@ def play_game():
         choice = input("VOCÊ DESEJA JOGAR NOVAMENTE? (S/N): ").upper()
         if choice == "N":
             break
+        elif choice == "S":
+            continue  # Reinicia o jogo
+        else:
+            print("OPÇÃO INVÁLIDA. DIGITE 'S' PARA SIM OU 'N' PARA NÃO.")
 
 
 play_game()
