@@ -308,12 +308,13 @@ def play_game():
                 continue
 
             # Handle special commands
-            if coord[0] == "Z":
+            prefix = ""
+
+            # Check for prefixes and adjust input accordingly
+            if coord.startswith("Z"):
                 prefix = "Z"
-            elif coord[0] == "F":
+            elif coord.startswith("F") and len(coord) > 2 and coord[2].isdigit():
                 prefix = "F"
-            else:
-                prefix = ""
 
             try:
                 x = ord(coord[len(prefix)]) - 65
