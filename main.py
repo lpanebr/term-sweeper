@@ -50,7 +50,8 @@ def print_board(visible, mines):
               end=" ")
         for x in range(N):
             if visible[x][y] == 0:
-                print(".", end=" ")
+                print("▇",
+                      end=" ")  # Show blocked symbol for cells not revealed
             elif visible[x][y] == 2:
                 print(COLORS["YELLOW"] + "X" + COLORS["RESET"],
                       end=" ")  # Flag for marked bombs
@@ -155,7 +156,7 @@ def play_game():
                 if choice == "N":
                     return  # Termina o jogo
                 elif choice == "S":
-                    continue
+                    continue  # Reinicia o loop para começar um novo jogo
                 else:
                     print(
                         "OPÇÃO INVÁLIDA. DIGITE 'S' PARA SIM OU 'N' PARA NÃO.")
