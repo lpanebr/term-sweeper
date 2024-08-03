@@ -32,6 +32,7 @@ instructions = (
     f"{COLORS['GREEN']}5. Show/Hide help instructions:{COLORS['RESET']} h"
 )
 
+
 def initialize_board():
     # Initialize the board with mines and visibility matrix
     mines = [[0 for _ in range(N)] for _ in range(N)]
@@ -51,7 +52,8 @@ def initialize_board():
 
 def clear_screen():
     # Clear the console screen
-    os.system('cls' if os.name == 'nt' else 'clear')
+    os.system("cls" if os.name == "nt" else "clear")
+
 
 def print_board(visible, mines, mines_left, elapsed_time, game_over=False):
     # Clear the screen before printing the new board
@@ -69,14 +71,16 @@ def print_board(visible, mines, mines_left, elapsed_time, game_over=False):
         print(COLORS["DIM"] + f"{y + 1} │" + COLORS["RESET"], end=" ")
         for x in range(N):
             if game_over and mines[x][y] == 1:
-                print(COLORS["RED"] + "◉" + COLORS["RESET"],
-                      end=" ")  # Show mines as ◉ on game over
+                print(
+                    COLORS["RED"] + "◉" + COLORS["RESET"], end=" "
+                )  # Show mines as ◉ on game over
             elif visible[x][y] == 0:
                 print("▩", end=" ")  # Use ▩ for cells not revealed
                 # print("▢", end=" ")  # Use ▢ for cells not revealed
             elif visible[x][y] == 2:
-                print(COLORS["RED"] + "▩" + COLORS["RESET"],
-                      end=" ")  # Use ▩ for flagged cells
+                print(
+                    COLORS["RED"] + "▩" + COLORS["RESET"], end=" "
+                )  # Use ▩ for flagged cells
             else:
                 count = count_surrounding_mines(mines, x, y)
                 if count == 0:
@@ -133,8 +137,7 @@ def reveal_adjacent(visible, mines, x, y):
                         print(
                             f"VOCÊ ACERTOU UMA MINA EM {chr(64 + nx + 1)}{ny + 1}! GAME OVER."
                         )
-                        print_board(visible, mines, 0, 0,
-                                    game_over=True)  # Show mines
+                        print_board(visible, mines, 0, 0, game_over=True)  # Show mines
                         return True  # Signal that a mine was found
     return False  # No mine was found
 
@@ -151,8 +154,7 @@ def auto_reveal(visible, mines, x, y):
             for dx in range(-1, 2):
                 for dy in range(-1, 2):
                     nx, ny = cx + dx, cy + dy
-                    if (0 <= nx < N
-                            and 0 <= ny < N) and (nx, ny) not in visited:
+                    if (0 <= nx < N and 0 <= ny < N) and (nx, ny) not in visited:
                         visited.add((nx, ny))
                         if visible[nx][ny] == 0:
                             visible[nx][ny] = 1
@@ -180,30 +182,43 @@ def check_victory(visible, mines):
                 return False
     return True
 
+
 def print_boxed_text(text, border_color, text_color):
     reset_color = COLORS["RESET"]
     lines = text.split("\n")
-    
+
     # Remove ANSI escape codes to calculate the correct length
-    ansi_escape = re.compile(r'\x1b\[[0-9;]*m')
-    stripped_lines = [ansi_escape.sub('', line) for line in lines]
-    
-    max_length = max(len(line) for line in stripped_lines)  # Find the maximum length of stripped lines
-    
+    ansi_escape = re.compile(r"\x1b\[[0-9;]*m")
+    stripped_lines = [ansi_escape.sub("", line) for line in lines]
+
+    max_length = max(
+        len(line) for line in stripped_lines
+    )  # Find the maximum length of stripped lines
+
     # Print the top border
     print(border_color + "  ┌─" + "─" * max_length + "─┐" + reset_color)
-    
+
     # Print each line within the box
     for line in lines:
         # Calculate padding
-        stripped_line = ansi_escape.sub('', line)
+        stripped_line = ansi_escape.sub("", line)
         padding = max_length - len(stripped_line)
-        
+
         # Print the text centered with padding spaces
-        print(border_color + "  │ " + text_color + line + " " * padding + reset_color + border_color + " │")
-    
+        print(
+            border_color
+            + "  │ "
+            + text_color
+            + line
+            + " " * padding
+            + reset_color
+            + border_color
+            + " │"
+        )
+
     # Print the bottom border
     print(border_color + "  └─" + "─" * max_length + "─┘" + reset_color)
+
 
 def play_game():
     print()
@@ -234,8 +249,7 @@ def play_game():
                 elif choice == "S":
                     break  # Reinicia o loop para começar um novo jogo
                 else:
-                    print(
-                        "OPÇÃO INVÁLIDA. DIGITE 'S' PARA SIM OU 'N' PARA NÃO.")
+                    print("OPÇÃO INVÁLIDA. DIGITE 'S' PARA SIM OU 'N' PARA NÃO.")
                     continue
 
             if len(coord) < 2:
@@ -243,16 +257,16 @@ def play_game():
                 continue
 
             # Handle special commands
-            if coord[0] == 'Z':
-                prefix = 'Z'
-            elif coord[0] == 'F':
-                prefix = 'F'
+            if coord[0] == "Z":
+                prefix = "Z"
+            elif coord[0] == "F":
+                prefix = "F"
             else:
-                prefix = ''
+                prefix = ""
 
             try:
                 x = ord(coord[len(prefix)]) - 65
-                y = int(coord[len(prefix) + 1:]) - 1
+                y = int(coord[len(prefix) + 1 :]) - 1
             except ValueError:
                 print("COORDENADA INVÁLIDA")
                 continue
@@ -261,24 +275,27 @@ def play_game():
                 print("COORDENADA INVÁLIDA")
                 continue
 
-            if prefix == 'Z':
+            if prefix == "Z":
                 # Reveal adjacent cells without changing the center cell
                 if reveal_adjacent(visible, mines, x, y):
                     break  # End game if a mine was found
                 print_board(visible, mines, mines_left, elapsed_time)
                 if check_victory(visible, mines):
-                    print(COLORS["GREEN"] + COLORS["BOLD"] +
-                          "PARABÉNS! VOCÊ VENCEU O JOGO!" + COLORS["RESET"])
+                    print(
+                        COLORS["GREEN"]
+                        + COLORS["BOLD"]
+                        + "PARABÉNS! VOCÊ VENCEU O JOGO!"
+                        + COLORS["RESET"]
+                    )
                     break
                 continue
 
-            if prefix == 'F':
+            if prefix == "F":
                 # Toggle flag for the cell
                 if visible[x][y] in (0, 2):  # Only toggle if not revealed
                     toggle_flag(visible, x, y)
                 else:
-                    print(
-                        "CÉLULA JÁ REVELADA. NÃO PODE SER MARCADA COMO BOMBA.")
+                    print("CÉLULA JÁ REVELADA. NÃO PODE SER MARCADA COMO BOMBA.")
                 print_board(visible, mines, mines_left, elapsed_time)
                 continue
 
@@ -297,17 +314,19 @@ def play_game():
                 auto_reveal(visible, mines, x, y)
 
             if mines[x][y] == 1:
-                print(
-                    f"VOCÊ ACERTOU UMA MINA EM {chr(64 + x + 1)}{y + 1}! GAME OVER."
-                )
+                print(f"VOCÊ ACERTOU UMA MINA EM {chr(64 + x + 1)}{y + 1}! GAME OVER.")
                 print_board(visible, mines, 0, 0, game_over=True)  # Show mines
                 break
 
             print_board(visible, mines, mines_left, elapsed_time)
 
             if check_victory(visible, mines):
-                print(COLORS["GREEN"] + COLORS["BOLD"] +
-                      "PARABÉNS! VOCÊ VENCEU O JOGO!" + COLORS["RESET"])
+                print(
+                    COLORS["GREEN"]
+                    + COLORS["BOLD"]
+                    + "PARABÉNS! VOCÊ VENCEU O JOGO!"
+                    + COLORS["RESET"]
+                )
                 break
 
         # Ask if the player wants to play again
