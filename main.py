@@ -162,18 +162,7 @@ def reveal_adjacent(visible, mines, x, y):
                 if visible[nx][ny] == 0:  # Only reveal if not already visible
                     visible[nx][ny] = 1
                     if mines[nx][ny] == 1:
-                        game_over_msg = (
-                            f"You hit a mine at {chr(64 + nx + 1)}{ny + 1}! Game Over."
-                        )
-                        print_board(
-                            visible,
-                            mines,
-                            0,
-                            0,
-                            show_instructions=False,
-                            game_over=game_over_msg,
-                        )  # Show mines
-                        return True  # Signal that a mine was found
+                        return f"You hit a mine at {chr(64 + nx + 1)}{ny + 1}! Game Over."  # Signal that a mine was found
     return False  # No mine was found
 
 
@@ -278,7 +267,7 @@ def play_game():
             else:
                 elapsed_time = 0
 
-            # Print the board, passing the current state of the instructions display flag
+            # Print the board once per iteration
             print_board(
                 visible,
                 mines,
@@ -287,11 +276,13 @@ def play_game():
                 show_instructions,
                 warning=warning_msg,
                 victory=victory_msg,
+                game_over=game_over_msg,
             )
 
             # Reset messages for the next loop
             warning_msg = ""
             victory_msg = ""
+            game_over_msg = ""  # Reset game over message to avoid repetition
 
             coord = input("ENTER COORDINATE (E.G., A1): ").upper()
 
@@ -335,9 +326,10 @@ def play_game():
 
             if prefix == "Z":
                 # Reveal adjacent cells without changing the center cell
-                if reveal_adjacent(visible, mines, x, y):
+                result = reveal_adjacent(visible, mines, x, y)
+                if result:
+                    game_over_msg = result
                     break  # End game if a mine was found
-                print_board(visible, mines, mines_left, elapsed_time, show_instructions)
                 if check_victory(visible, mines):
                     victory_msg = "CONGRATULATIONS! YOU WON THE GAME!"
                     break
@@ -347,6 +339,10 @@ def play_game():
                 # Toggle flag for the cell
                 if visible[x][y] in (0, 2):  # Only toggle if not revealed
                     toggle_flag(visible, x, y)
+                    # Check for victory after toggling a flag
+                    if check_victory(visible, mines):
+                        victory_msg = "CONGRATULATIONS! YOU WON THE GAME!"
+                        break
                 else:
                     warning_msg = "CELL ALREADY REVEALED. CANNOT BE MARKED AS A MINE."
                 continue
@@ -369,17 +365,7 @@ def play_game():
                 game_over_msg = (
                     f"You hit a mine at {chr(64 + x + 1)}{y + 1}! Game Over."
                 )
-                print_board(
-                    visible,
-                    mines,
-                    0,
-                    0,
-                    show_instructions=False,
-                    game_over=game_over_msg,
-                )  # Show mines
                 break
-
-            print_board(visible, mines, mines_left, elapsed_time, show_instructions)
 
             if check_victory(visible, mines):
                 victory_msg = "CONGRATULATIONS! YOU WON THE GAME!"
