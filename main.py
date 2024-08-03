@@ -114,6 +114,27 @@ def reveal_adjacent(visible, mines, x, y):
     return False  # No mine was found
 
 
+def auto_reveal(visible, mines, x, y):
+    # Automatically reveal adjacent cells if the selected cell is empty (no surrounding mines)
+    queue = [(x, y)]
+    visited = set(queue)
+
+    while queue:
+        cx, cy = queue.pop(0)
+        if count_surrounding_mines(mines, cx, cy) == 0:
+            # If no mines around, reveal all adjacent cells
+            for dx in range(-1, 2):
+                for dy in range(-1, 2):
+                    nx, ny = cx + dx, cy + dy
+                    if (0 <= nx < N
+                            and 0 <= ny < N) and (nx, ny) not in visited:
+                        visited.add((nx, ny))
+                        if visible[nx][ny] == 0:
+                            visible[nx][ny] = 1
+                            if count_surrounding_mines(mines, nx, ny) == 0:
+                                queue.append((nx, ny))
+
+
 def toggle_flag(visible, x, y):
     # Toggle the flag for marking or unmarking a cell as a suspected bomb
     if visible[x][y] == 0:
@@ -211,6 +232,10 @@ def play_game():
                 continue
 
             visible[x][y] = 1
+
+            # Automatically reveal adjacent cells if the revealed cell is empty
+            if count_surrounding_mines(mines, x, y) == 0:
+                auto_reveal(visible, mines, x, y)
 
             if mines[x][y] == 1:
                 print(
