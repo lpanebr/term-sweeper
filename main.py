@@ -48,16 +48,16 @@ def print_board(visible, mines, mines_left, elapsed_time, game_over=False):
     # Clear the screen before printing the new board
     clear_screen()
 
-    # Print the current state of the board with colors
-    print("  ", end="")
+    print("    ", end="")
     for i in range(1, N + 1):
-        print(COLORS["BOLD"] + COLORS["CYAN"] + chr(64 + i) + COLORS["RESET"],
-              end=" ")
+        print(COLORS["DIM"] + chr(64 + i) + COLORS["RESET"], end=" ")
     print()
+    # Print the top border and column labels
+    print(COLORS["DIM"] + "  ┌" + "──" * N + "─┐" + COLORS["RESET"])
 
+    # Print each row with row labels on both sides
     for y in range(N):
-        print(COLORS["BOLD"] + COLORS["CYAN"] + str(y + 1) + COLORS["RESET"],
-              end=" ")
+        print(COLORS["DIM"] + f"{y + 1} │" + COLORS["RESET"], end=" ")
         for x in range(N):
             if game_over and mines[x][y] == 1:
                 print(COLORS["RED"] + "◉" + COLORS["RESET"],
@@ -84,7 +84,14 @@ def print_board(visible, mines, mines_left, elapsed_time, game_over=False):
                     elif count >= 4:
                         color = COLORS["RED"]
                     print(color + str(count) + COLORS["RESET"], end=" ")
-        print()
+        print(COLORS["DIM"] + f"│ {y + 1}" + COLORS["RESET"])
+
+    # Print the bottom border and column labels
+    print(COLORS["DIM"] + "  └" + "──" * N + "─┘" + COLORS["RESET"])
+    print("    ", end="")
+    for i in range(1, N + 1):
+        print(COLORS["DIM"] + chr(64 + i) + COLORS["RESET"], end=" ")
+    print()
 
     # Display remaining mines and elapsed time
     print(f"\nMINAS: {mines_left}")
