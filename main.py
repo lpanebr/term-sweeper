@@ -64,7 +64,7 @@ def print_board(
     show_instructions,
     warning="",
     victory="",
-    game_over=False,
+    game_over_msg="",
 ):
     # Clear the screen before printing the new board
     clear_screen()
@@ -83,7 +83,7 @@ def print_board(
         print(COLORS["DIM"] + f"{y + 1} │" + COLORS["RESET"], end=" ")
         for x in range(N):
             # Show mines on game over
-            if game_over and mines[x][y] == 1:
+            if game_over_msg and mines[x][y] == 1:
                 print(
                     COLORS["RED"] + "◉" + COLORS["RESET"], end=" "
                 )  # Show mines as ◉ on game over
@@ -134,9 +134,9 @@ def print_board(
         print_boxed_text(victory, COLORS["GREEN"], COLORS["WHITE"])
 
     # Show game over message if provided
-    if game_over:
+    if game_over_msg:
         print()
-        print_boxed_text(game_over, COLORS["RED"], COLORS["YELLOW"])
+        print_boxed_text(game_over_msg, COLORS["RED"], COLORS["YELLOW"])
 
     # Show instructions if the flag is set to True
     if show_instructions:
@@ -278,12 +278,13 @@ def play_game():
                 show_instructions,
                 warning=warning_msg,
                 victory=victory_msg,
-                game_over=game_over,
+                game_over_msg=game_over_msg,
             )
 
             # Reset messages for the next loop
             warning_msg = ""
             victory_msg = ""
+            game_over_msg = ""  # Reset game over message to avoid repetition
 
             coord = input("ENTER COORDINATE (E.G., A1): ").upper()
 
@@ -374,12 +375,26 @@ def play_game():
                 victory_msg = "CONGRATULATIONS! YOU WON THE GAME!"
                 break
 
-        # Display game over message
+        # Display game over message if game is over
         if game_over:
             print_board(
-                visible, mines, 0, elapsed_time, show_instructions=False, game_over=True
+                visible,
+                mines,
+                0,
+                elapsed_time,
+                show_instructions=False,
+                game_over_msg=game_over_msg,
             )
             print_boxed_text(game_over_msg, COLORS["RED"], COLORS["YELLOW"])
+        elif victory_msg:  # Display victory message if player wins
+            print_board(
+                visible,
+                mines,
+                0,
+                elapsed_time,
+                show_instructions=False,
+                victory=victory_msg,
+            )
 
         # Ask if the player wants to play again
         choice = input("DO YOU WANT TO PLAY AGAIN? (Y/N): ").upper()
