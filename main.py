@@ -33,8 +33,6 @@ instructions = (
     f"{COLORS['GREEN']}5. Show/Hide help instructions:{COLORS['RESET']} h"
 )
 
-game_over_msg = ""
-
 
 def initialize_board():
     # Initialize the board with mines and visibility matrix
@@ -59,7 +57,14 @@ def clear_screen():
 
 
 def print_board(
-    visible, mines, mines_left, elapsed_time, show_instructions, game_over=""
+    visible,
+    mines,
+    mines_left,
+    elapsed_time,
+    show_instructions,
+    warning="",
+    victory="",
+    game_over="",
 ):
     # Clear the screen before printing the new board
     clear_screen()
@@ -114,8 +119,23 @@ def print_board(
     print()
 
     # Display remaining mines and elapsed time
-    print(f"\nMINAS: {mines_left}")
-    print(f"TEMPO: {elapsed_time}")
+    print(f"\nMINES: {mines_left}")
+    print(f"TIME: {elapsed_time}")
+
+    # Show warning if provided
+    if warning:
+        print()
+        print_boxed_text(warning, COLORS["YELLOW"], COLORS["WHITE"])
+
+    # Show victory message if provided
+    if victory:
+        print()
+        print_boxed_text(victory, COLORS["GREEN"], COLORS["WHITE"])
+
+    # Show game over message if provided
+    if game_over:
+        print()
+        print_boxed_text(game_over, COLORS["RED"], COLORS["YELLOW"])
 
     # Show instructions if the flag is set to True
     if show_instructions:
@@ -142,7 +162,9 @@ def reveal_adjacent(visible, mines, x, y):
                 if visible[nx][ny] == 0:  # Only reveal if not already visible
                     visible[nx][ny] = 1
                     if mines[nx][ny] == 1:
-                        game_over_msg = f"VOCÊ ACERTOU UMA MINA EM {chr(64 + nx + 1)}{ny + 1}! GAME OVER."
+                        game_over_msg = (
+                            f"You hit a mine at {chr(64 + nx + 1)}{ny + 1}! Game Over."
+                        )
                         print_board(
                             visible,
                             mines,
@@ -241,6 +263,9 @@ def play_game():
         mines, visible = initialize_board()
         first_move = True
         start_time = 0
+        game_over_msg = ""  # Initialize the game over message variable
+        warning_msg = ""  # Initialize the warning message variable
+        victory_msg = ""  # Initialize the victory message variable
 
         while True:
             # Calculate the number of unmarked mines
@@ -254,9 +279,21 @@ def play_game():
                 elapsed_time = 0
 
             # Print the board, passing the current state of the instructions display flag
-            print_board(visible, mines, mines_left, elapsed_time, show_instructions)
+            print_board(
+                visible,
+                mines,
+                mines_left,
+                elapsed_time,
+                show_instructions,
+                warning=warning_msg,
+                victory=victory_msg,
+            )
 
-            coord = input("DIGITE A COORDENADA (EXEMPLO: A1): ").upper()
+            # Reset messages for the next loop
+            warning_msg = ""
+            victory_msg = ""
+
+            coord = input("ENTER COORDINATE (E.G., A1): ").upper()
 
             if coord == "H":
                 # Toggle the instructions display flag
@@ -264,17 +301,17 @@ def play_game():
                 continue
 
             if coord == "Q":
-                choice = input("VOCÊ DESEJA JOGAR NOVAMENTE? (S/N): ").upper()
+                choice = input("DO YOU WANT TO PLAY AGAIN? (Y/N): ").upper()
                 if choice == "N":
-                    return  # Termina o jogo
-                elif choice == "S":
-                    break  # Reinicia o loop para começar um novo jogo
+                    return  # End the game
+                elif choice == "Y":
+                    break  # Restart the loop to start a new game
                 else:
-                    print("OPÇÃO INVÁLIDA. DIGITE 'S' PARA SIM OU 'N' PARA NÃO.")
+                    warning_msg = "INVALID OPTION. ENTER 'Y' FOR YES OR 'N' FOR NO."
                     continue
 
             if len(coord) < 2:
-                print("COORDENADA INVÁLIDA")
+                warning_msg = "INVALID COORDINATE"
                 continue
 
             # Handle special commands
@@ -289,11 +326,11 @@ def play_game():
                 x = ord(coord[len(prefix)]) - 65
                 y = int(coord[len(prefix) + 1 :]) - 1
             except ValueError:
-                print("COORDENADA INVÁLIDA")
+                warning_msg = "INVALID COORDINATE"
                 continue
 
             if x < 0 or x >= N or y < 0 or y >= N:
-                print("COORDENADA INVÁLIDA")
+                warning_msg = "INVALID COORDINATE"
                 continue
 
             if prefix == "Z":
@@ -302,12 +339,7 @@ def play_game():
                     break  # End game if a mine was found
                 print_board(visible, mines, mines_left, elapsed_time, show_instructions)
                 if check_victory(visible, mines):
-                    print(
-                        COLORS["GREEN"]
-                        + COLORS["BOLD"]
-                        + "PARABÉNS! VOCÊ VENCEU O JOGO!"
-                        + COLORS["RESET"]
-                    )
+                    victory_msg = "CONGRATULATIONS! YOU WON THE GAME!"
                     break
                 continue
 
@@ -316,12 +348,11 @@ def play_game():
                 if visible[x][y] in (0, 2):  # Only toggle if not revealed
                     toggle_flag(visible, x, y)
                 else:
-                    print("CÉLULA JÁ REVELADA. NÃO PODE SER MARCADA COMO BOMBA.")
-                print_board(visible, mines, mines_left, elapsed_time, show_instructions)
+                    warning_msg = "CELL ALREADY REVEALED. CANNOT BE MARKED AS A MINE."
                 continue
 
             if visible[x][y] == 1:
-                print("JÁ REVELADO")
+                warning_msg = "ALREADY REVEALED"
                 continue
 
             if first_move:
@@ -336,7 +367,7 @@ def play_game():
 
             if mines[x][y] == 1:
                 game_over_msg = (
-                    f"VOCÊ ACERTOU UMA MINA EM {chr(64 + x + 1)}{y + 1}! GAME OVER."
+                    f"You hit a mine at {chr(64 + x + 1)}{y + 1}! Game Over."
                 )
                 print_board(
                     visible,
@@ -348,34 +379,27 @@ def play_game():
                 )  # Show mines
                 break
 
-            print_board(
-                visible,
-                mines,
-                mines_left,
-                elapsed_time,
-                show_instructions,
-            )
+            print_board(visible, mines, mines_left, elapsed_time, show_instructions)
 
             if check_victory(visible, mines):
-                print(
-                    COLORS["GREEN"]
-                    + COLORS["BOLD"]
-                    + "PARABÉNS! VOCÊ VENCEU O JOGO!"
-                    + COLORS["RESET"]
-                )
+                victory_msg = "CONGRATULATIONS! YOU WON THE GAME!"
                 break
 
         if len(game_over_msg) > 0:
             print_boxed_text(game_over_msg, COLORS["RED"], COLORS["YELLOW"])
 
         # Ask if the player wants to play again
-        choice = input("VOCÊ DESEJA JOGAR NOVAMENTE? (S/N): ").upper()
+        choice = input("DO YOU WANT TO PLAY AGAIN? (Y/N): ").upper()
         if choice == "N":
             break
-        elif choice == "S":
-            continue  # Reinicia o jogo
+        elif choice == "Y":
+            continue  # Restart the game
         else:
-            print("OPÇÃO INVÁLIDA. DIGITE 'S' PARA SIM OU 'N' PARA NÃO.")
+            print_boxed_text(
+                "INVALID OPTION. ENTER 'Y' FOR YES OR 'N' FOR NO.",
+                COLORS["YELLOW"],
+                COLORS["WHITE"],
+            )
 
 
 play_game()
