@@ -44,7 +44,7 @@ def clear_screen():
     os.system('cls' if os.name == 'nt' else 'clear')
 
 
-def print_board(visible, mines, mines_left, elapsed_time):
+def print_board(visible, mines, mines_left, elapsed_time, game_over=False):
     # Clear the screen before printing the new board
     clear_screen()
 
@@ -59,32 +59,31 @@ def print_board(visible, mines, mines_left, elapsed_time):
         print(COLORS["BOLD"] + COLORS["CYAN"] + str(y + 1) + COLORS["RESET"],
               end=" ")
         for x in range(N):
-            if visible[x][y] == 0:
-                print("▇",
-                      end=" ")  # Show blocked symbol for cells not revealed
+            if game_over and mines[x][y] == 1:
+                print(COLORS["RED"] + "◉" + COLORS["RESET"],
+                      end=" ")  # Show mines as ◉ on game over
+            elif visible[x][y] == 0:
+                print("▢", end=" ")  # Use ▢ for cells not revealed
             elif visible[x][y] == 2:
-                print(COLORS["YELLOW"] + "X" + COLORS["RESET"],
-                      end=" ")  # Flag for marked bombs
+                print(COLORS["RED"] + "▸" + COLORS["RESET"],
+                      end=" ")  # Use ▸ for flagged cells
             else:
                 count = count_surrounding_mines(mines, x, y)
-                if mines[x][y] == 1:
-                    print(COLORS["RED"] + "X" + COLORS["RESET"], end=" ")
+                if count == 0:
+                    print(
+                        " ", end=" "
+                    )  # Show empty space for cells with no adjacent mines
                 else:
-                    if count == 0:
-                        print(
-                            " ", end=" "
-                        )  # Show empty space for cells with no adjacent mines
-                    else:
-                        color = COLORS["WHITE"]
-                        if count == 1:
-                            color = COLORS["BLUE"]
-                        elif count == 2:
-                            color = COLORS["GREEN"]
-                        elif count == 3:
-                            color = COLORS["YELLOW"]
-                        elif count >= 4:
-                            color = COLORS["RED"]
-                        print(color + str(count) + COLORS["RESET"], end=" ")
+                    color = COLORS["WHITE"]
+                    if count == 1:
+                        color = COLORS["BLUE"]
+                    elif count == 2:
+                        color = COLORS["GREEN"]
+                    elif count == 3:
+                        color = COLORS["YELLOW"]
+                    elif count >= 4:
+                        color = COLORS["RED"]
+                    print(color + str(count) + COLORS["RESET"], end=" ")
         print()
 
     # Display remaining mines and elapsed time
@@ -102,14 +101,6 @@ def count_surrounding_mines(mines, x, y):
     return count
 
 
-def reveal_mines(mines):
-    # Reveal all mines on the board
-    for x in range(N):
-        for y in range(N):
-            if mines[x][y] == 1:
-                print(f"MINE AT {chr(64 + x + 1)}{y + 1}")
-
-
 def reveal_adjacent(visible, mines, x, y):
     # Reveal all immediate surrounding cells of a given coordinate
     for dx in range(-1, 2):
@@ -123,7 +114,8 @@ def reveal_adjacent(visible, mines, x, y):
                         print(
                             f"VOCÊ ACERTOU UMA MINA EM {chr(64 + nx + 1)}{ny + 1}! GAME OVER."
                         )
-                        reveal_mines(mines)
+                        print_board(visible, mines, 0, 0,
+                                    game_over=True)  # Show mines
                         return True  # Signal that a mine was found
     return False  # No mine was found
 
@@ -204,7 +196,7 @@ def play_game():
                 if choice == "N":
                     return  # Termina o jogo
                 elif choice == "S":
-                    continue  # Reinicia o loop para começar um novo jogo
+                    break  # Reinicia o loop para começar um novo jogo
                 else:
                     print(
                         "OPÇÃO INVÁLIDA. DIGITE 'S' PARA SIM OU 'N' PARA NÃO.")
@@ -272,7 +264,7 @@ def play_game():
                 print(
                     f"VOCÊ ACERTOU UMA MINA EM {chr(64 + x + 1)}{y + 1}! GAME OVER."
                 )
-                reveal_mines(mines)
+                print_board(visible, mines, 0, 0, game_over=True)  # Show mines
                 break
 
             print_board(visible, mines, mines_left, elapsed_time)
