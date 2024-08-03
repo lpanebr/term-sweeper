@@ -1,4 +1,5 @@
 import random
+import time
 
 # Constants for the game
 N = 8  # Size of the board (8x8)
@@ -37,7 +38,7 @@ def initialize_board():
     return mines, visible
 
 
-def print_board(visible, mines):
+def print_board(visible, mines, mines_left, elapsed_time):
     # Print the current state of the board with colors
     print("  ", end="")
     for i in range(1, N + 1):
@@ -76,6 +77,10 @@ def print_board(visible, mines):
                             color = COLORS["RED"]
                         print(color + str(count) + COLORS["RESET"], end=" ")
         print()
+
+    # Display remaining mines and elapsed time
+    print(f"\nMINAS: {mines_left}")
+    print(f"TEMPO: {elapsed_time}")
 
 
 def count_surrounding_mines(mines, x, y):
@@ -168,9 +173,22 @@ def play_game():
 
     while True:
         mines, visible = initialize_board()
-        print_board(visible, mines)
+        first_move = True
+        start_time = 0
 
         while True:
+            # Calculate the number of unmarked mines
+            marked_flags = sum(row.count(2) for row in visible)
+            mines_left = B - marked_flags
+
+            # Calculate elapsed time
+            if not first_move:
+                elapsed_time = int(time.time() - start_time)
+            else:
+                elapsed_time = 0
+
+            print_board(visible, mines, mines_left, elapsed_time)
+
             coord = input("DIGITE A COORDENADA (EXEMPLO: A1): ").upper()
             if coord == "Q":
                 choice = input("VOCÊ DESEJA JOGAR NOVAMENTE? (S/N): ").upper()
@@ -210,7 +228,7 @@ def play_game():
                 # Reveal adjacent cells without changing the center cell
                 if reveal_adjacent(visible, mines, x, y):
                     break  # End game if a mine was found
-                print_board(visible, mines)
+                print_board(visible, mines, mines_left, elapsed_time)
                 if check_victory(visible, mines):
                     print(COLORS["GREEN"] + COLORS["BOLD"] +
                           "PARABÉNS! VOCÊ VENCEU O JOGO!" + COLORS["RESET"])
@@ -224,12 +242,16 @@ def play_game():
                 else:
                     print(
                         "CÉLULA JÁ REVELADA. NÃO PODE SER MARCADA COMO BOMBA.")
-                print_board(visible, mines)
+                print_board(visible, mines, mines_left, elapsed_time)
                 continue
 
             if visible[x][y] == 1:
                 print("JÁ REVELADO")
                 continue
+
+            if first_move:
+                start_time = time.time()
+                first_move = False
 
             visible[x][y] = 1
 
@@ -244,7 +266,7 @@ def play_game():
                 reveal_mines(mines)
                 break
 
-            print_board(visible, mines)
+            print_board(visible, mines, mines_left, elapsed_time)
 
             if check_victory(visible, mines):
                 print(COLORS["GREEN"] + COLORS["BOLD"] +
