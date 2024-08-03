@@ -64,7 +64,7 @@ def print_board(
     show_instructions,
     warning="",
     victory="",
-    game_over="",
+    game_over=False,
 ):
     # Clear the screen before printing the new board
     clear_screen()
@@ -82,7 +82,8 @@ def print_board(
     for y in range(N):
         print(COLORS["DIM"] + f"{y + 1} │" + COLORS["RESET"], end=" ")
         for x in range(N):
-            if len(game_over) > 0 and mines[x][y] == 1:
+            # Show mines on game over
+            if game_over and mines[x][y] == 1:
                 print(
                     COLORS["RED"] + "◉" + COLORS["RESET"], end=" "
                 )  # Show mines as ◉ on game over
@@ -255,6 +256,7 @@ def play_game():
         game_over_msg = ""  # Initialize the game over message variable
         warning_msg = ""  # Initialize the warning message variable
         victory_msg = ""  # Initialize the victory message variable
+        game_over = False  # Initialize the game over flag
 
         while True:
             # Calculate the number of unmarked mines
@@ -276,13 +278,12 @@ def play_game():
                 show_instructions,
                 warning=warning_msg,
                 victory=victory_msg,
-                game_over=game_over_msg,
+                game_over=game_over,
             )
 
             # Reset messages for the next loop
             warning_msg = ""
             victory_msg = ""
-            game_over_msg = ""  # Reset game over message to avoid repetition
 
             coord = input("ENTER COORDINATE (E.G., A1): ").upper()
 
@@ -329,6 +330,7 @@ def play_game():
                 result = reveal_adjacent(visible, mines, x, y)
                 if result:
                     game_over_msg = result
+                    game_over = True  # Set game over flag
                     break  # End game if a mine was found
                 if check_victory(visible, mines):
                     victory_msg = "CONGRATULATIONS! YOU WON THE GAME!"
@@ -365,13 +367,18 @@ def play_game():
                 game_over_msg = (
                     f"You hit a mine at {chr(64 + x + 1)}{y + 1}! Game Over."
                 )
+                game_over = True  # Set game over flag
                 break
 
             if check_victory(visible, mines):
                 victory_msg = "CONGRATULATIONS! YOU WON THE GAME!"
                 break
 
-        if len(game_over_msg) > 0:
+        # Display game over message
+        if game_over:
+            print_board(
+                visible, mines, 0, elapsed_time, show_instructions=False, game_over=True
+            )
             print_boxed_text(game_over_msg, COLORS["RED"], COLORS["YELLOW"])
 
         # Ask if the player wants to play again
