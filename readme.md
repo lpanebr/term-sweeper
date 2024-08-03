@@ -79,25 +79,7 @@ The objective of the game is to clear the board by revealing all non-mine cells 
 
 ## Example Gameplay
 
-```text
-   A B C D E F G H
-  ┌─────────────────┐
-1 │ ▩ ▩ ▩ ▩ ▩ ▩ ▩ ▩ │ 1
-2 │ ▩ ▩ ▩ ▩ ▩ ▩ ▩ ▩ │ 2
-3 │ ▩ ▩ ▩ ▩ ▩ ▩ ▩ ▩ │ 3
-4 │ ▩ ▩ ▩ ▩ ▩ ▩ ▩ ▩ │ 4
-5 │ ▩ ▩ ▩ ▩ ▩ ▩ ▩ ▩ │ 5
-6 │ ▩ ▩ ▩ ▩ ▩ ▩ ▩ ▩ │ 6
-7 │ ▩ ▩ ▩ ▩ ▩ ▩ ▩ ▩ │ 7
-8 │ ▩ ▩ ▩ ▩ ▩ ▩ ▩ ▩ │ 8
-  └─────────────────┘
-   A B C D E F G H
-
-MINES: 10
-TIME: 0
-
-ENTER COORDINATE (E.G., A1):
-```
+![image](https://github.com/user-attachments/assets/1b4be4fd-ab94-4902-bf14-4a01a3a8be76)
 
 ## Troubleshooting
 
