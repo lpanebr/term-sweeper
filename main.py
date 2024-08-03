@@ -1,5 +1,6 @@
 import random
 import time
+import os
 
 # Constants for the game
 N = 8  # Size of the board (8x8)
@@ -38,7 +39,15 @@ def initialize_board():
     return mines, visible
 
 
+def clear_screen():
+    # Clear the console screen
+    os.system('cls' if os.name == 'nt' else 'clear')
+
+
 def print_board(visible, mines, mines_left, elapsed_time):
+    # Clear the screen before printing the new board
+    clear_screen()
+
     # Print the current state of the board with colors
     print("  ", end="")
     for i in range(1, N + 1):
