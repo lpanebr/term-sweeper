@@ -197,7 +197,11 @@ def play_game():
 
             if prefix == 'X':
                 # Toggle flag for the cell
-                toggle_flag(visible, x, y)
+                if visible[x][y] in (0, 2):  # Only toggle if not revealed
+                    toggle_flag(visible, x, y)
+                else:
+                    print(
+                        "CÉLULA JÁ REVELADA. NÃO PODE SER MARCADA COMO BOMBA.")
                 print_board(visible, mines)
                 continue
 
